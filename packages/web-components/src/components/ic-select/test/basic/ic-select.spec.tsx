@@ -600,6 +600,27 @@ describe("ic-select", () => {
     expect(page.rootInstance.getOptions()[0].label).toEqual(loadingErrorLabel);
   });
 
+  it("should announce loading and timeout state on the select button's accessible name", async () => {
+    const page = await newSpecPage({
+      components: [Select, Menu, InputComponentContainer],
+      html: `<ic-select label="IC Select Test" timeout="1000"></ic-select>`,
+    });
+    const button = page.root?.shadowRoot?.querySelector(
+      inputElement
+    ) as HTMLButtonElement;
+
+    expect(button.getAttribute("aria-label")).not.toContain(loadingLabel);
+
+    page.rootInstance.loading = true;
+    await page.waitForChanges();
+    expect(button.getAttribute("aria-label")).toContain(loadingLabel);
+
+    await waitForTimeout(1000);
+    await page.waitForChanges();
+    expect(button.getAttribute("aria-label")).toContain(loadingErrorLabel);
+    expect(button.getAttribute("aria-label")).not.toContain(loadingLabel);
+  });
+
   it("should deduplicateOptions and log a console warning about the offending items", async () => {
     const page = await newSpecPage({
       components: [Select, Menu, InputComponentContainer],

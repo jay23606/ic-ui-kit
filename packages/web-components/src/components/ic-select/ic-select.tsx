@@ -474,6 +474,15 @@ export class Select {
     );
   };
 
+  /**
+   * Returns the text announced by screen readers while the options are loading or have timed out.
+   */
+  private getLoadingStateText = (): string => {
+    if (this.hasTimedOut) return this.loadingErrorLabel;
+    if (this.loading) return this.loadingLabel;
+    return "";
+  };
+
   private getOptions = (): IcSelectOption[] => {
     const options =
       this.searchable &&
@@ -978,6 +987,10 @@ export class Select {
                   this.flatOptions.length
                 } selected, ${this.getLabelString()}`
               : this.getLabelString()) || placeholder
+          }${
+            this.getLoadingStateText()
+              ? `, ${this.getLoadingStateText()}`
+              : ""
           }`}
           onClick={this.handleClick}
           aria-describedby={describedBy}
@@ -1035,7 +1048,11 @@ export class Select {
           }}
           role="combobox"
           autocomplete="off"
-          aria-label={label}
+          aria-label={
+            this.getLoadingStateText()
+              ? `${label}, ${this.getLoadingStateText()}`
+              : label
+          }
           aria-describedby={describedBy}
           aria-activedescendant={ariaActiveDescendant}
           aria-autocomplete="list"
